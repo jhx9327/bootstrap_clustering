@@ -2011,7 +2011,9 @@ MyNbClust_hx<-function (data = NULL, nc = 2)
   nn <- numberObsAfter <- dim(jeu)[1]
   pp <- dim(jeu)[2]
   
-  partition <- kmeans(jeu, nc)$cluster
+  partition <- kmeans(jeu, nc)#$cluster
+  
+  print(paste("the number of cluster is ", nc))
   # results.final <- list(All.index = res, Best.nc = nc, 
   #                       Best.partition = partition)
   return(partition)

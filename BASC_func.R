@@ -149,7 +149,10 @@ BASC_hx <- function(Matrix=NULL, rows.ID=NULL, boots=NULL, type="ward2.D2"){
   while ( mean(diag(S.sum)) < Boots ) {l=l+1 #iteration counter
   
   # Stratified Bootstrap of Y, with replacement
-  M <- t(sample(data.frame(t(Matrix)),D[1], replace=TRUE))
+  # M <- t(sample(data.frame(t(Matrix)),D[1], replace=TRUE)) # needs to record the lists of chosen samples (index)
+  sample_idx <- sample(1:D[1], D[1], replace = TRUE)
+  M <- Matrix[sample_idx,]
+    
   clus <- 0   # Is it a good clustering??
   
   # try(
@@ -157,29 +160,27 @@ BASC_hx <- function(Matrix=NULL, rows.ID=NULL, boots=NULL, type="ward2.D2"){
     # Clustering algorithm & best partition based on NbClust
     # clus<-MyNbClust(M, distance = "euclidean", min.nc=2, max.nc=D[2]-1, 
     #                 method = "ward.D2", index = "all",plotetc = FALSE))
-  nc <- sample(2:137, 1) # create an integer randomly as the number of clusters
+  nc <- sample(2:30, 1) # create an integer randomly as the number of clusters
   clus <- MyNbClust_hx(M, nc)
   
-  #############
-  # clus is the direct output of k-means, needs to be changed
-  #############
+  # re-organized the clustering results (sampled subjects randomly) to original sequence
+  organized_clusCut <- integer(D[1]) # create a vector whose values are all 0.
+  for (i in sample_idx)
+  {
+    organized_clusCut[sample_idx[i]] <- clusCut[i] # how to solve the repeated subjects are divided into different cluster?
     
-
-  if (class(clus) != "numeric" ){ N=N+1
-  # Obtains the best partition
-  clusCut <- clus#$Best.partition
-  k <- c(k,max(clusCut))
+  }
+  clusCut <- organized_clusCut
   
   # Obtains the row's IDs (removes X*.?) 
-  s <- names(clusCut)
-  s <- sapply(strsplit(s, split='X', fixed=TRUE), function(x) (x[2]))
-  names(clusCut) <- s <- sapply(strsplit(s, split='.', fixed=TRUE), function(x) (x[1]))
+  names(clusCut) <- rows.ID  #<- sapply(strsplit(s, split='.', fixed=TRUE), function(x) (x[1]))
+  
   
   # Stability matrix
   Sij.B <- mtx.jointProb(clusCut,S0) # Similarity boot matrix
   S.bin <- ceiling(Sij.B/max(Sij.B)) # Binary ocurrence = Stability Mtx per boot
   S.sum <- S.sum+S.bin # Sum of all Sij matrices
-  }
+  # }
   
   print("*************************************************")
   print(paste("Loop",l,", Selected partitions",N,"... mean ij occurrence:",mean(diag(S.sum))))
@@ -191,7 +192,7 @@ BASC_hx <- function(Matrix=NULL, rows.ID=NULL, boots=NULL, type="ward2.D2"){
   # -----------------------------------------------------------------------
   # RESULTS  
   # Vector of i occurrence is the diagonal of the Total Sum of stability matrices (Sij)
-  return(list(Sij=S.sum, k=k, N=N))
+  return(list(Sij=S.sum, k=nc, N=boots))
 }
 
 

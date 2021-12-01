@@ -36,31 +36,31 @@ k10 <- BASC_hx(Matrix = Npsy.matrix, rows.ID = sub_lists, boots = 10)
 # #Loads the data
 # # load(paste0(home,"/git_here/micasoft/sandbox/raul/BASC/10k_34subjs_new.RData"))
 # 
-# # Stabilization of the Final Sij_Boot matrix
-# Sij <- k10$Sij/k10$N
-# Sij <- Sij/max(Sij)
-# 
-# # Color palette
-# colC <- colorRampPalette(c("gold","darkgoldenrod2","seagreen","royalblue4","white","white","white","royalblue4","seagreen","darkgoldenrod2","gold"))
-# # Plot Stability matrix
-# par(mfrow=c(1,1))
-# try(corrplot(Sij,order="hclust",tl.col="black",method="color"
-#          ,addgrid.col=NA,col=colC(100),is.corr = FALSE,cl.lim = c(0,1)))
-# 
-# # ----------------------------------------------------------------------------------- #
-# #       Hierarchical Agglomerative Clustering
-# # ----------------------------------------------------------------------------------- #
-# # Final step: Hierarchical aglomerative clustering of the joint probability matrix
-# # http://scikit-learn.org/stable/modules/clustering.html
-# 
-# # Calculo de la matriz de distancias euclidenanas
-# vec <- rownames(Sij)
-# d <- dist(Sij,method = "euclidean")
-# 
-# # Método de Cluster
-# hc <- hclust(d,method = "ward.D",members = vec)
-# hc.dend <- as.dendrogram(hc) 
-# 
+# Stabilization of the Final Sij_Boot matrix
+Sij <- k10$Sij/k10$N
+Sij <- Sij/max(Sij)
+
+# Color palette
+colC <- colorRampPalette(c("gold","darkgoldenrod2","seagreen","royalblue4","white","white","white","royalblue4","seagreen","darkgoldenrod2","gold"))
+# Plot Stability matrix
+par(mfrow=c(1,1))
+try(corrplot(Sij,order="hclust",tl.col="black",method="color"
+         ,addgrid.col=NA,col=colC(100),is.corr = FALSE,cl.lim = c(0,1)))
+
+# ----------------------------------------------------------------------------------- #
+#       Hierarchical Agglomerative Clustering
+# ----------------------------------------------------------------------------------- #
+# Final step: Hierarchical aglomerative clustering of the joint probability matrix
+# http://scikit-learn.org/stable/modules/clustering.html
+
+# Calculo de la matriz de distancias euclidenanas
+vec <- rownames(Sij)
+d <- dist(Sij,method = "euclidean")
+
+# Método de Cluster
+hc <- hclust(d,method = "ward.D",members = vec)
+hc.dend <- as.dendrogram(hc)
+
 # # Color the first sbranch in golden... the second sub-branch in green and the second sub-branch  in blue
 # hc.dend[[1]] = dendrapply(hc.dend[[1]], colbranches, "darkgoldenrod2")
 # hc.dend[[2]][[2]] = dendrapply(hc.dend[[2]][[2]], colbranches, "seagreen")
@@ -87,7 +87,7 @@ k10 <- BASC_hx(Matrix = Npsy.matrix, rows.ID = sub_lists, boots = 10)
 # plotLines(Npsy.clust[Npsy.clust$clust == "2",][3:12],"seagreen",x)
 # blank.plot(x,lab,"Cluster 3")
 # plotLines(Npsy.clust[Npsy.clust$clust == "3",][3:12],"darkblue",x)
-# 
+
 # # ----------------------------------------------------------------------------------- #
 # #               HAC Matrix of the clusterization
 # # ----------------------------------------------------------------------------------- #
