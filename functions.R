@@ -2001,3 +2001,19 @@ MyNbClust<-function (data = NULL, diss = NULL, distance = "euclidean", min.nc = 
             Best.partition = partition)
     return(results.final)
 }
+
+
+MyNbClust_hx<-function (data = NULL, nc = 2)
+{
+  jeu1 <- as.matrix(data)
+  numberObsBefore <- dim(jeu1)[1]
+  jeu <- na.omit(jeu1)
+  nn <- numberObsAfter <- dim(jeu)[1]
+  pp <- dim(jeu)[2]
+  
+  partition <- kmeans(jeu, nc)$cluster
+  # results.final <- list(All.index = res, Best.nc = nc, 
+  #                       Best.partition = partition)
+  return(partition)
+  
+}
