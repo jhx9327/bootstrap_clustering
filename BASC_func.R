@@ -127,7 +127,8 @@ BASC_hx <- function(Matrix=NULL, rows.ID=NULL, boots=NULL, type="ward2.D2"){
         if ( X[i]==X[j] ) { ij<-1 } else {ij<-0}
         val<-joint[x[1], x[2]]+ij
         joint[x[1], x[2]] <- joint[x[2], x[1]] <- val}
-      J<-J[-match(i,J)]}
+      J<-J[-match(i,J)] # return elements in J except element i.
+      }
     return(joint)}
   
   # -----------------------------------------------------------------------
@@ -160,12 +161,12 @@ BASC_hx <- function(Matrix=NULL, rows.ID=NULL, boots=NULL, type="ward2.D2"){
     # Clustering algorithm & best partition based on NbClust
     # clus<-MyNbClust(M, distance = "euclidean", min.nc=2, max.nc=D[2]-1, 
     #                 method = "ward.D2", index = "all",plotetc = FALSE))
-  nc <- sample(2:30, 1) # create an integer randomly as the number of clusters
+  nc <- sample(2:20, 1) # create an integer randomly as the number of clusters
   clus <- MyNbClust_hx(M, nc)
   
   # re-organized the clustering results (sampled subjects randomly) to original sequence
   organized_clusCut <- integer(D[1]) # create a vector whose values are all 0.
-  for (i in sample_idx)
+  for (i in 1:length(sample_idx))
   {
     organized_clusCut[sample_idx[i]] <- clusCut[i] # how to solve the repeated subjects are divided into different cluster?
     
