@@ -9,6 +9,9 @@ require(NbClust)
 require(corrplot)
 require(gplots)
 
+require(dendextend)
+require(dendextendRcpp)
+
 # Local ~home directory
 #home <- path.expand("~")
 home <- "C:\\1-hongxiu\\codes\\github"
@@ -28,7 +31,7 @@ sub_lists <- sub_lists[1:138,c("FILE_ID")]
 #       BASC - Boostrap Analysis of Stable Clusters
 # ----------------------------------------------------------------------------------- #
 
-k10 <- BASC_hx(Matrix = Npsy.matrix, rows.ID = sub_lists, boots = 10)
+k10 <- BASC_hx_new(Matrix = Npsy.matrix, rows.ID = sub_lists, boots = 20000)
 # 
 # # Saves the result of the 10,000 bootstrap to a .RData file
 # #save(k10,file = paste0(home,"/git_here/micasoft/sandbox/raul/BASC/10k_34subjs.RData"))
@@ -41,11 +44,21 @@ Sij <- k10$Sij/k10$N
 Sij <- Sij/max(Sij)
 
 # Color palette
-colC <- colorRampPalette(c("gold","darkgoldenrod2","seagreen","royalblue4","white","white","white","royalblue4","seagreen","darkgoldenrod2","gold"))
+# colC <- colorRampPalette(c("gold","darkgoldenrod2","seagreen","royalblue4","white","white","white","royalblue4","seagreen","darkgoldenrod2","gold"))
+colC <- colorRampPalette(c("white","royalblue4","seagreen","darkgoldenrod2","gold"))
 # Plot Stability matrix
 par(mfrow=c(1,1))
 try(corrplot(Sij,order="hclust",tl.col="black",method="color"
          ,addgrid.col=NA,col=colC(100),is.corr = FALSE,cl.lim = c(0,1)))
+
+
+
+# ----------------------------------------------------------------------------------- #
+#   Choose the optimal k of clustering
+# ----------------------------------------------------------------------------------- #
+# dunn(Sij, as.integer(clust.ID$clusterBest)) # calculate the ratio of intra- vs inter- cluster distance
+# fviz_nbclust(Sij, kmeans, method = "wss") # plot the total within sum of square
+
 
 # ----------------------------------------------------------------------------------- #
 #       Hierarchical Agglomerative Clustering
@@ -58,24 +71,31 @@ vec <- rownames(Sij)
 d <- dist(Sij,method = "euclidean")
 
 # Método de Cluster
-hc <- hclust(d,method = "ward.D",members = vec)
+hc <- hclust(d,method = "ward.D") #,members = vec
 hc.dend <- as.dendrogram(hc)
 
-# # Color the first sbranch in golden... the second sub-branch in green and the second sub-branch  in blue
-# hc.dend[[1]] = dendrapply(hc.dend[[1]], colbranches, "darkgoldenrod2")
-# hc.dend[[2]][[2]] = dendrapply(hc.dend[[2]][[2]], colbranches, "seagreen")
-# hc.dend[[2]][[1]] = dendrapply(hc.dend[[2]][[1]], colbranches, "darkblue")
-# 
-# # Dendrogram
-# par(mfrow=c(2,2))
-# plot(hc.dend,xlab="",main="Dendrogram",col.main="black",cex.main=3,col="black",lwd=4,axes = FALSE,ylab="High")
-# axis(2,col="black",lwd=2,at = seq(0,10,5),lab = seq(0,10,5),cex.axis=1.2,las=2,col.axis="black")
-# 
-# # Plots of each cluster
-# # Selecciona solo 3 clusters
-# clusterBest <- cutree(hc, 3)
-# clust.ID<-as.data.frame(cbind(clusterBest,names(clusterBest)))
+# Color the first sbranch in golden... the second sub-branch in green and the second sub-branch  in blue
+hc.dend[[1]] = dendrapply(hc.dend[[1]], colbranches, "darkgoldenrod2")
+hc.dend[[2]][[2]] = dendrapply(hc.dend[[2]][[2]], colbranches, "seagreen")
+hc.dend[[2]][[1]] = dendrapply(hc.dend[[2]][[1]], colbranches, "darkblue")
+
+# plot(hc.dend, type = 'rectangle', ylab = 'Height')#, ylim = c(1,20))
+
+# Dendrogram
+dend_h <- heights_per_k.dendrogram(hc.dend) # (this can take some time)
+
+par(mfrow=c(1,1))
+plot(hc.dend,xlab="",main="Dendrogram",col.main="black",cex.main=3,col="black",lwd=4,axes = FALSE,ylab="High")#, ylim=c(dend_h[138], dend_h[3]))
+axis(2,col="black",lwd=2,at = seq(0,10,5),lab = seq(0,10,5),cex.axis=1.2,las=2,col.axis="black")
+
+# Plots of each cluster
+# Selecciona solo 3 clusters
+clusterBest <- cutree(hc, 3)
+clust.ID<-as.data.frame(cbind(clusterBest,names(clusterBest)))
+write.csv(clust.ID,'class_id.csv', row.names=FALSE)
+
 # colnames(clust.ID)<-c("clust","urm")
+# Npsy.z <- Npsy.matrix
 # Npsy.clust <- merge(Npsy.z,clust.ID,by="urm")
 # x <- 1:10
 # len <- length(Npsy.z)
